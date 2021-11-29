@@ -15,7 +15,8 @@ func main() {
 	//连接gRPC服务器
 	conn, err := grpc.Dial(Address, grpc.WithInsecure())
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("Connect server failed: %s", err)
+		return
 	}
 	defer conn.Close()
 
@@ -23,11 +24,9 @@ func main() {
 	c := pb.NewHelloClient(conn)
 
 	//调用方法
-	reqBody := new(pb.HelloRequest)
-	reqBody.Name = "gRPC"
-	r, err := c.SayHello(context.Background(), reqBody)
+	r, err := c.SayHello(context.Background(), 	&pb.HelloRequest{Name: "gRPC(hello world)"})
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("Invoke server failed: %s", err)
 	}
-	fmt.Println(r.Message)
+	fmt.Printf("Invoke successful: %+v", r.Message)
 }

@@ -18,13 +18,12 @@ type helloService struct{}
 
 func (h helloService) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
 	resp := new(pb.HelloReply)
-	resp.Message = "hello" + in.Name + "."
+	resp.Message = "hello " + in.Name + "."
 	return resp, nil
 }
 
-var HelloServer = helloService{}
-
 func main() {
+	// 监听本地端口
 	listen, err := net.Listen("tcp", Address)
 	if err != nil {
 		fmt.Printf("failed to listen:%v", err)
@@ -32,9 +31,14 @@ func main() {
 
 	//实现gRPC Server
 	s := grpc.NewServer()
+
 	//注册helloServer为客户端提供服务
-	pb.RegisterHelloServer(s, HelloServer) //内部调用了s.RegisterServer()
+	pb.RegisterHelloServer(s, &helloService{}) //内部调用了s.RegisterServer()
 	fmt.Println("Listen on" + Address)
 
-	s.Serve(listen)
+	err = s.Serve(listen)
+	if err != nil {
+		fmt.Printf("Start service failed:%v", err)
+		return
+	}
 }
